@@ -86,14 +86,12 @@ var perspectiveExample = function () {
   // var theta = 0.0;
   // var phi = 0.0;
   // var dr = (5.0 * Math.PI) / 180.0;
-  var theta = [0, 0, 0];
-  var thetaLoc;
-  var theta_now=0.0;
+
   var near = 0.1;
   var far = 100.0;
   var radius = 5.0;
-  theta[0] = -1.0;
-  theta[1] = 0.0;
+  var theta = -1.0;
+  var angle = 0.0;
   // -1.0471975511965976
   var phi = 1.570796326794896;
   var dr = (5.0 * Math.PI) / 180.0;
@@ -101,8 +99,8 @@ var perspectiveExample = function () {
   var fovy = 45.0; // Field-of-view in Y direction angle (in degrees)
   var aspect; // Viewport aspect ratio
 
-  var modelViewMatrixLoc, projectionMatrixLoc;
-  var modelViewMatrix, projectionMatrix;
+  var modelViewMatrixLoc, projectionMatrixLoc, rotatedMatrixLoc;
+  var modelViewMatrix, projectionMatrix, rotatedMatrix;
   var eye;
   var rightButton = false;
   var leftButton = false;
@@ -111,17 +109,19 @@ var perspectiveExample = function () {
   const up = vec3(0.0, 1.0, 0.0);
 
   function rotateRight() {
-    theta[1] += 1.0;
-    gl.uniform3fv(thetaLoc, theta);
+    angle += 3.0;
+    theta += 0.005;
+    rotatedMatrix = rotate(angle, [0, 0, 1]);
   }
   function rotateLeft() {
-    theta[1] += -1.0;
-    gl.uniform3fv(thetaLoc, theta);
+    angle -= 3.0;
+    theta -= 0.005;
+    rotatedMatrix = rotate(angle, [0, 0, 1]);
   }
-  function stop() {
-    theta[1] = 0.0;
-    gl.uniform3fv(thetaLoc, theta);
-  }
+  // function stop() {
+  //   theta = 1.0;
+  //   rotatedMatrix = rotate(theta, [0, 0, 1]);
+  // }
   document.getElementById("Button1").addEventListener("click", function () {
     rightButton = true;
     leftButton = false;
@@ -131,7 +131,7 @@ var perspectiveExample = function () {
     rightButton = false;
   });
   document.getElementById("Button3").addEventListener("click", function () {
-    leftButton =false;
+    leftButton = false;
     rightButton = false;
   });
 
@@ -221,11 +221,10 @@ var perspectiveExample = function () {
     gl.vertexAttribPointer(positionLoc, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(positionLoc);
 
-    thetaLoc = gl.getUniformLocation(program, "uTheta");
-    theta[0] = -1.0;
-
     modelViewMatrixLoc = gl.getUniformLocation(program, "uModelViewMatrix");
     projectionMatrixLoc = gl.getUniformLocation(program, "uProjectionMatrix");
+    rotatedMatrixLoc = gl.getUniformLocation(program, "rotatedMatrix");
+    rotatedMatrix = rotate(angle, [0, 0, 1]); 
 
     // buttons for viewing parameters
 
@@ -236,28 +235,29 @@ var perspectiveExample = function () {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     eye = vec3(
-      radius * Math.sin(theta[0]) * Math.cos(phi),
-      radius * Math.sin(theta[0]) * Math.sin(phi),
-      radius * Math.cos(theta[0])
+      radius * Math.sin(theta) * Math.cos(phi),
+      radius * Math.sin(theta) * Math.sin(phi),
+      radius * Math.cos(theta)
       // 0,0,1
     );
 
     modelViewMatrix = lookAt(eye, at, up);
     projectionMatrix = perspective(fovy, aspect, near, far);
+    
 
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
-
-    if(rightButton){
+    
+    if (rightButton) {
       rotateRight();
     }
-    if(leftButton){
+    if (leftButton) {
       rotateLeft();
     }
+    gl.uniformMatrix4fv(rotatedMatrixLoc, false, flatten(rotatedMatrix));
+
     gl.drawArrays(gl.TRIANGLES, 0, numPositions);
     requestAnimationFrame(render);
   }
 };
 perspectiveExample();
-
-// theta[1]+=1.0;
