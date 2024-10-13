@@ -11,6 +11,7 @@ var perspectiveExample = function () {
 
   const A = (1 + Math.sqrt(5)) / 2; // The golden ratio
   const B = 1 / A;
+
   var vertices = [
     vec4(1, 1, 1, 1.0),
     vec4(1, 1, -1, 1.0),
@@ -59,15 +60,16 @@ var perspectiveExample = function () {
 
   // Translasi pada sumbu X
   // Kecepatan translasi
-  const TRANSLATE_LIMIT_R = 12.0;
-  const TRANSLATE_LIMIT_L = -12.0;
-  var near = 0.1;
-  var far = 100.0;
-  var radius = 5.0;
-  var theta = -1.0;
+  const TRANSLATE_LIMIT_R = 18.0;
+  const TRANSLATE_LIMIT_L = -18.0;
+  var near = 0.2;
+  var far = 10.0;
+  var radius = 8.0;
+  var theta = 0.08;
   var angle = 0.0;
   // -1.0471975511965976
-  var phi = 1.570796326794896;
+  // var phi = 1.570796326794896;
+  var phi = -2;
   var dr = (5.0 * Math.PI) / 180.0;
 
   var fovy = 60.0; // Field-of-view in Y direction angle (in degrees)
@@ -82,7 +84,13 @@ var perspectiveExample = function () {
   var MoveLButton = false;
   var MoveRGLBBButton = false;
   var MoveLGLBBButton = false;
+  var buttonParabola = false;
+  var parabolaButton = false;
   var tx = 0.0;
+  var px = 0.0;
+  var py = 0.0;
+  var deltaPx = 0.04;
+  var deltaPy = 0.04;
   let lastUpdateTime = 0;
   var kecepatanGLBB;
   var akselerasi;
@@ -159,18 +167,53 @@ var perspectiveExample = function () {
       tx = TRANSLATE_LIMIT_R;
     }
   }
-  // function moveLeftGLBB(acc) {
-  //   if (!moveLeftGLBB.hasBeenCalled) {
-  //     kecepatanGLBB = 0.0;
-  //   } else {
-  //     kecepatanGLBB += acc;
-  //     tx -= kecepatanGLBB;
-  //     if (tx < TRANSLATE_LIMIT_L) {
-  //       tx = TRANSLATE_LIMIT_R;
-  //     }
-  //   }
-  // }
-
+  function parabolic(acc) {
+    px += deltaPx;
+    py += deltaPy;
+    console.log("py", py);
+    const currentTime = Date.now(); // Waktu saat ini dalam milidetik
+    // Inisialisasi saat fungsi pertama kali dipanggil
+    if (!parabolic.hasBeenCalled) {
+      lastUpdateTime = currentTime; // Set waktu saat ini sebagai waktu terakhir update
+      parabolic.hasBeenCalled = true;
+    }
+    if (py > 0) {
+      if (currentTime - lastUpdateTime >= 50) {
+        deltaPy -= acc;
+        lastUpdateTime = currentTime;
+        console.log("Halo1");
+      }
+    } else {
+      if (currentTime - lastUpdateTime >= 50) {
+        deltaPy += acc;
+        lastUpdateTime = currentTime;
+        console.log("Halo2");
+      }
+    }
+    if (px > TRANSLATE_LIMIT_R) {
+      px = TRANSLATE_LIMIT_L;
+    }
+    if (py > TRANSLATE_LIMIT_R) {
+      py = TRANSLATE_LIMIT_L;
+    }
+    if (py < TRANSLATE_LIMIT_L) {
+      py = TRANSLATE_LIMIT_R;
+    }
+  }
+  document.getElementById("Button0").addEventListener("click", function () {
+    tx = 0.0;
+    px = 0.0;
+    py = 0.0;
+    leftButton = false;
+    rightButton = false;
+    MoveRButton = false;
+    MoveLButton = false;
+    MoveRGLBBButton = false;
+    MoveLGLBBButton = false;
+    moveRightGLBB.hasBeenCalled = false;
+    moveLeftGLBB.hasBeenCalled = false;
+    parabolaButton = false;
+  });
   document.getElementById("Button1").addEventListener("click", function () {
     rightButton = true;
     leftButton = false;
@@ -180,6 +223,7 @@ var perspectiveExample = function () {
     MoveLGLBBButton = false;
     moveRightGLBB.hasBeenCalled = false;
     moveLeftGLBB.hasBeenCalled = false;
+    parabolaButton = false;
   });
   document.getElementById("Button2").addEventListener("click", function () {
     leftButton = true;
@@ -190,6 +234,7 @@ var perspectiveExample = function () {
     MoveLGLBBButton = false;
     moveRightGLBB.hasBeenCalled = false;
     moveLeftGLBB.hasBeenCalled = false;
+    parabolaButton = false;
   });
   document.getElementById("Button3").addEventListener("click", function () {
     leftButton = false;
@@ -200,6 +245,7 @@ var perspectiveExample = function () {
     MoveLGLBBButton = false;
     moveRightGLBB.hasBeenCalled = false;
     moveLeftGLBB.hasBeenCalled = false;
+    parabolaButton = false;
   });
 
   document.getElementById("Button4").addEventListener("click", function () {
@@ -211,6 +257,7 @@ var perspectiveExample = function () {
     MoveLGLBBButton = false;
     moveRightGLBB.hasBeenCalled = false;
     moveLeftGLBB.hasBeenCalled = false;
+    parabolaButton = false;
   });
   document.getElementById("Button5").addEventListener("click", function () {
     leftButton = true;
@@ -221,6 +268,7 @@ var perspectiveExample = function () {
     MoveLGLBBButton = false;
     moveRightGLBB.hasBeenCalled = false;
     moveLeftGLBB.hasBeenCalled = false;
+    parabolaButton = false;
   });
   document.getElementById("Button6").addEventListener("click", function () {
     leftButton = false;
@@ -230,6 +278,7 @@ var perspectiveExample = function () {
     MoveRGLBBButton = true;
     MoveLGLBBButton = false;
     moveLeftGLBB.hasBeenCalled = false;
+    parabolaButton = false;
   });
   document.getElementById("Button7").addEventListener("click", function () {
     leftButton = true;
@@ -239,6 +288,17 @@ var perspectiveExample = function () {
     MoveRGLBBButton = false;
     MoveLGLBBButton = true;
     moveRightGLBB.hasBeenCalled = false;
+    parabolaButton = false;
+  });
+  document.getElementById("Button8").addEventListener("click", function () {
+    leftButton = false;
+    rightButton = true;
+    MoveRButton = false;
+    MoveLButton = false;
+    MoveRGLBBButton = false;
+    MoveLGLBBButton = false;
+    moveRightGLBB.hasBeenCalled = false;
+    parabolaButton = true;
   });
 
   function fives(a, b, c, d, e, f) {
@@ -333,6 +393,9 @@ var perspectiveExample = function () {
     const perlambatanValue = parseFloat(
       document.getElementById("ButtonPerlambatan").value
     );
+    const parabolaValue = parseFloat(
+      document.getElementById("ButtonParabola").value
+    );
     eye = vec3(
       radius * Math.sin(theta) * Math.cos(phi),
       radius * Math.sin(theta) * Math.sin(phi),
@@ -340,10 +403,14 @@ var perspectiveExample = function () {
       // 0,0,1
     );
 
+    var posisiawal = translate(-6, 0.0, 0.0);
     var translationMatrix = translate(tx, 0.0, 0.0);
+    var parabolicMatrix = translate(px, py, 0.0);
     rotatedMatrix = rotate(angle, [0, 0, 1]);
     modelViewMatrix = lookAt(eye, at, up);
     projectionMatrix = perspective(fovy, aspect, near, far);
+    modelViewMatrix = mult(modelViewMatrix, posisiawal);
+    modelViewMatrix = mult(modelViewMatrix, parabolicMatrix);
     modelViewMatrix = mult(modelViewMatrix, translationMatrix);
     modelViewMatrix = mult(modelViewMatrix, rotatedMatrix);
 
@@ -364,6 +431,9 @@ var perspectiveExample = function () {
     }
     if (MoveLGLBBButton) {
       moveLeftGLBB(perlambatanValue, accValue);
+    }
+    if (parabolaButton) {
+      parabolic(parabolaValue);
     }
 
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
