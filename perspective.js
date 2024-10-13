@@ -34,28 +34,6 @@ var perspectiveExample = function () {
     vec4(-A, 0, -B, 1.0),
   ];
 
-  // var vertices = [
-  //   vec4(-1.37638, 0, 0.262866, 1.0),
-  //   vec4(1.37638, 0, -0.262866, 1.0),
-  //   vec4(-0.425325, -1.30902, 0.262866, 1.0),
-  //   vec4(-0.425325, 1.30902, 0.262866, 1.0),
-  //   vec4(1.11352, -0.809017, 0.262866, 1.0),
-  //   vec4(1.11352, 0.809017, 0.262866, 1.0),
-  //   vec4(-0.262866, -0.809017, 1.11352, 1.0),
-  //   vec4(-0.262866, 0.809017, 1.11352, 1.0),
-  //   vec4(-0.688191, -0.5, -1.11352, 1.0),
-  //   vec4(-0.688191, 0.5, -1.11352, 1.0),
-  //   vec4(0.688191, -0.5, 1.11352, 1.0),
-  //   vec4(0.688191, 0.5, 1.11352, 1.0),
-  //   vec4(0.850651, 0, -1.11352, 1.0),
-  //   vec4(-1.11352, -0.809017, -0.262866, 1.0),
-  //   vec4(-1.11352, 0.809017, -0.262866, 1.0),
-  //   vec4(-0.850651, 0, 1.11352, 1.0),
-  //   vec4(0.262866, -0.809017, -1.11352, 1.0),
-  //   vec4(0.262866, 0.809017, -1.11352, 1.0),
-  //   vec4(0.425325, -1.30902, -0.262866, 1.0),
-  //   vec4(0.425325, 1.30902, -0.262866, 1.0),
-  // ];
 
   var vertexColors = [
     vec4(0.0, 0.0, 0.0, 1.0), // black
@@ -80,15 +58,8 @@ var perspectiveExample = function () {
     vec4(0.5, 0.0, 1.0, 1.0), // violet
   ];
 
-  // var near = 0.3;
-  // var far = 3.0;
-  // var radius = 4.0;
-  // var theta = 0.0;
-  // var phi = 0.0;
-  // var dr = (5.0 * Math.PI) / 180.0;
-  var tx = 0.0; // Translasi pada sumbu X
+  // Translasi pada sumbu X
   // Kecepatan translasi
-  var deltaTx = 0.05;
   const TRANSLATE_LIMIT_R = 12.0;
   const TRANSLATE_LIMIT_L = -12.0;
   var near = 0.1;
@@ -100,7 +71,7 @@ var perspectiveExample = function () {
   var phi = 1.570796326794896;
   var dr = (5.0 * Math.PI) / 180.0;
 
-  var fovy = 45.0; // Field-of-view in Y direction angle (in degrees)
+  var fovy = 60.0; // Field-of-view in Y direction angle (in degrees)
   var aspect; // Viewport aspect ratio
 
   var modelViewMatrixLoc, projectionMatrixLoc, rotatedMatrixLoc;
@@ -110,35 +81,32 @@ var perspectiveExample = function () {
   var leftButton = false;
   var MoveRButton = false;
   var MoveLButton = false;
+  var percepatan;
+  var tx=0.0;
   const at = vec3(0.0, 0.0, 0.0);
   const up = vec3(0.0, 1.0, 0.0);
 
   function rotateRight() {
     angle += 3.0;
-    // theta += 0.005;
     rotatedMatrix = rotate(angle, [0, 0, 1]);
   }
   function rotateLeft() {
     angle -= 3.0;
-    // theta -= 0.005;
     rotatedMatrix = rotate(angle, [0, 0, 1]);
   }
-  function moveRight() {
+  function moveRight(deltaTx) {
     tx += deltaTx;
     if (tx > TRANSLATE_LIMIT_R) {
       tx = TRANSLATE_LIMIT_L;
     }
   }
-  function moveLeft() {
+  function moveLeft(deltaTx) {
     tx -= deltaTx;
     if (tx < TRANSLATE_LIMIT_L) {
       tx = TRANSLATE_LIMIT_R;
     }
   }
-  // function stop() {
-  //   theta = 1.0;
-  //   rotatedMatrix = rotate(theta, [0, 0, 1]);
-  // }
+
   document.getElementById("Button1").addEventListener("click", function () {
     rightButton = true;
     leftButton = false;
@@ -169,10 +137,9 @@ var perspectiveExample = function () {
     rightButton = false;
     MoveRButton = false;
     MoveLButton = true;
-
   });
 
-  function fives(a, b, c, d, e,f) {
+  function fives(a, b, c, d, e, f) {
     var indices = [
       a,
       b,
@@ -194,30 +161,18 @@ var perspectiveExample = function () {
   init();
 
   function colorCube() {
-    fives(0, 16, 2, 10, 8,1);
-    fives(0, 8, 4, 14, 12,2);
-    fives(16, 17, 1, 12, 0,3);
-    fives(1, 9, 11, 3, 17,4);
-    fives(1, 12, 14, 5, 9,5);
-    fives(2, 13, 15, 6, 10,6);
-    fives(13, 3, 17, 16, 2,0);
-    fives(3, 11, 7, 15, 13,8);
-    fives(4, 8, 10, 6, 18,9);
-    fives(14, 5, 19, 18, 4,10);
-    fives(5, 19, 7, 11, 9,11);
-    fives(15, 7, 19, 18, 6,12);
-    // fives(0, 8, 10, 2, 16);
-    // fives(0, 16, 17, 4, 12);
-    // fives(0, 12, 13, 1, 8);
-    // fives(1, 13, 3, 18, 9);
-    // fives(1, 9, 11, 5, 8);
-    // fives(2, 10, 6, 19, 14);
-    // fives(2, 14, 15, 3, 16);
-    // fives(3, 15, 19, 7, 18);
-    // fives(4, 17, 6, 10, 0);
-    // fives(5, 11, 7, 19, 6);
-    // fives(5, 6, 17, 16, 3);
-    // fives(7, 19, 14, 15, 18);
+    fives(0, 16, 2, 10, 8, 1);
+    fives(0, 8, 4, 14, 12, 2);
+    fives(16, 17, 1, 12, 0, 3);
+    fives(1, 9, 11, 3, 17, 4);
+    fives(1, 12, 14, 5, 9, 5);
+    fives(2, 13, 15, 6, 10, 6);
+    fives(13, 3, 17, 16, 2, 0);
+    fives(3, 11, 7, 15, 13, 8);
+    fives(4, 8, 10, 6, 18, 9);
+    fives(14, 5, 19, 18, 4, 10);
+    fives(5, 19, 7, 11, 9, 11);
+    fives(15, 7, 19, 18, 6, 12);
   }
 
   function init() {
@@ -261,7 +216,6 @@ var perspectiveExample = function () {
     modelViewMatrixLoc = gl.getUniformLocation(program, "uModelViewMatrix");
     projectionMatrixLoc = gl.getUniformLocation(program, "uProjectionMatrix");
     // rotatedMatrixLoc = gl.getUniformLocation(program, "rotatedMatrix");
-    rotatedMatrix = rotate(angle, [0, 0, 1]); 
 
     // buttons for viewing parameters
 
@@ -271,6 +225,9 @@ var perspectiveExample = function () {
   function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+
+    const kecepatan = document.getElementById("ButtonKecepatan");
+    const speedValue = parseFloat(kecepatan.value);
     eye = vec3(
       radius * Math.sin(theta) * Math.cos(phi),
       radius * Math.sin(theta) * Math.sin(phi),
@@ -279,13 +236,12 @@ var perspectiveExample = function () {
     );
 
     var translationMatrix = translate(tx, 0.0, 0.0);
+    rotatedMatrix = rotate(angle, [0, 0, 1]);
     modelViewMatrix = lookAt(eye, at, up);
     projectionMatrix = perspective(fovy, aspect, near, far);
     modelViewMatrix = mult(modelViewMatrix, translationMatrix);
     modelViewMatrix = mult(modelViewMatrix, rotatedMatrix);
-    
 
-    
     if (rightButton) {
       rotateRight();
     }
@@ -293,12 +249,12 @@ var perspectiveExample = function () {
       rotateLeft();
     }
     if (MoveRButton) {
-      moveRight();
+      moveRight(speedValue);
     }
     if (MoveLButton) {
-      moveLeft();
+      moveLeft(speedValue);
     }
-    
+
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
     gl.uniformMatrix4fv(rotatedMatrixLoc, false, flatten(rotatedMatrix));
