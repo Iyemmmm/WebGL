@@ -4,6 +4,7 @@ var perspectiveExample = function () {
   var canvas;
   var gl;
 
+  var currentShape = null; // Tidak ada objek yang tampil saat awal
   var numPositions = 108;
 
   var positions = [];
@@ -322,7 +323,7 @@ var perspectiveExample = function () {
 
   init();
 
-  function colorCube() {
+  function colorDodecahedron() {
     fives(0, 16, 2, 10, 8, 1);
     fives(0, 8, 4, 14, 12, 2);
     fives(16, 17, 1, 12, 0, 3);
@@ -357,7 +358,7 @@ var perspectiveExample = function () {
     var program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
 
-    colorCube();
+    colorDodecahedron();
 
     var cBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
