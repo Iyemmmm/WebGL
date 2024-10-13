@@ -4,8 +4,11 @@ var perspectiveExample = function () {
   var canvas;
   var gl;
 
-  var currentShape = null; // Tidak ada objek yang tampil saat awal
+  var currentShape = ""; // Tidak ada objek yang tampil saat awal
   var numPositions = 108;
+  var vBuffer, cBuffer; // Buffer untuk posisi
+  var positionLoc; // Lokasi atribut posisi dalam shader
+  var colorLoc; // Lokasi atribut warna dalam shader
 
   var positions = [];
   var colors = [];
@@ -301,6 +304,12 @@ var perspectiveExample = function () {
     moveRightGLBB.hasBeenCalled = false;
     parabolaButton = true;
   });
+  document
+    .getElementById("dodecahedron")
+    .addEventListener("click", function () {
+      currentShape = "dodecahedron";
+      colorDodecahedron();
+    });
 
   function fives(a, b, c, d, e, f) {
     var indices = [
@@ -321,8 +330,6 @@ var perspectiveExample = function () {
     }
   }
 
-  init();
-
   function colorDodecahedron() {
     fives(0, 16, 2, 10, 8, 1);
     fives(0, 8, 4, 14, 12, 2);
@@ -336,6 +343,36 @@ var perspectiveExample = function () {
     fives(14, 5, 19, 18, 4, 10);
     fives(5, 19, 7, 11, 9, 11);
     fives(15, 7, 19, 18, 6, 12);
+
+    // var cBuffer = gl.createBuffer();
+    // gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+    // gl.bufferData(gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW);
+
+    // var colorLoc = gl.getAttribLocation(program, "aColor");
+    // gl.vertexAttribPointer(colorLoc, 4, gl.FLOAT, false, 0, 0);
+    // gl.enableVertexAttribArray(colorLoc);
+
+    // var vBuffer = gl.createBuffer();
+    // gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+    // gl.bufferData(gl.ARRAY_BUFFER, flatten(positions), gl.STATIC_DRAW);
+
+    // var positionLoc = gl.getAttribLocation(program, "aPosition");
+    // gl.vertexAttribPointer(positionLoc, 4, gl.FLOAT, false, 0, 0);
+    // gl.enableVertexAttribArray(positionLoc);
+
+    // Buffer posisi
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(positions), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(positionLoc, 4, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(positionLoc);
+
+    // Buffer warna
+    gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(colorLoc, 4, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(colorLoc);
+
+    render(); // Panggil render setelah buffer diisi ulang
   }
 
   function init() {
@@ -360,28 +397,19 @@ var perspectiveExample = function () {
 
     colorDodecahedron();
 
-    var cBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW);
+    // Buat buffer tapi jangan isi datanya
+    vBuffer = gl.createBuffer();
+    cBuffer = gl.createBuffer();
 
-    var colorLoc = gl.getAttribLocation(program, "aColor");
-    gl.vertexAttribPointer(colorLoc, 4, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(colorLoc);
-
-    var vBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(positions), gl.STATIC_DRAW);
-
-    var positionLoc = gl.getAttribLocation(program, "aPosition");
-    gl.vertexAttribPointer(positionLoc, 4, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(positionLoc);
+    positionLoc = gl.getAttribLocation(program, "aPosition");
+    colorLoc = gl.getAttribLocation(program, "aColor");
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "uModelViewMatrix");
     projectionMatrixLoc = gl.getUniformLocation(program, "uProjectionMatrix");
 
     // buttons for viewing parameters
 
-    render();
+    render(); // Render awal (kosong) hanya untuk membersihkan layar
   }
 
   function render() {
@@ -440,8 +468,15 @@ var perspectiveExample = function () {
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
     gl.uniformMatrix4fv(rotatedMatrixLoc, false, flatten(rotatedMatrix));
-    gl.drawArrays(gl.TRIANGLES, 0, numPositions);
+    if (currentShape === "cube") {
+      // Gambar Kubus
+      gl.drawArrays(gl.TRIANGLES, 0, numPositions);
+    } else if (currentShape === "dodecahedron") {
+      // Gambar Dodecahedron
+      gl.drawArrays(gl.TRIANGLES, 0, numPositions);
+    }
     requestAnimationFrame(render);
   }
+  init();
 };
 perspectiveExample();
