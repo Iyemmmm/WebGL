@@ -34,7 +34,6 @@ var perspectiveExample = function () {
     vec4(-A, 0, -B, 1.0),
   ];
 
-
   var vertexColors = [
     vec4(0.0, 0.0, 0.0, 1.0), // black
     vec4(1.0, 0.0, 0.0, 1.0), // red
@@ -81,8 +80,13 @@ var perspectiveExample = function () {
   var leftButton = false;
   var MoveRButton = false;
   var MoveLButton = false;
-  var percepatan;
-  var tx=0.0;
+  var MoveRGLBBButton = false;
+  var MoveLGLBBButton = false;
+  var tx = 0.0;
+  let lastUpdateTime = 0;
+  var kecepatanGLBB;
+  var akselerasi;
+
   const at = vec3(0.0, 0.0, 0.0);
   const up = vec3(0.0, 1.0, 0.0);
 
@@ -106,24 +110,96 @@ var perspectiveExample = function () {
       tx = TRANSLATE_LIMIT_R;
     }
   }
+  function moveRightGLBB(perlambatan, percepatan) {
+    const currentTime = Date.now(); // Waktu saat ini dalam milidetik
+    // Inisialisasi saat fungsi pertama kali dipanggil
+    if (!moveRightGLBB.hasBeenCalled) {
+      kecepatanGLBB = 0.05;
+      lastUpdateTime = currentTime; // Set waktu saat ini sebagai waktu terakhir update
+      moveRightGLBB.hasBeenCalled = true;
+    }
+
+    // Periksa apakah sudah lebih dari 1 detik sejak update terakhir
+    akselerasi = percepatan - perlambatan;
+    if (akselerasi < 0) {
+      kecepatanGLBB = 0;
+    }
+    if (currentTime - lastUpdateTime >= 1000) {
+      kecepatanGLBB += akselerasi;
+      lastUpdateTime = currentTime;
+    }
+    tx += kecepatanGLBB;
+
+    // Reset posisi jika melebihi batas
+    if (tx > TRANSLATE_LIMIT_R) {
+      tx = TRANSLATE_LIMIT_L;
+    }
+  }
+  function moveLeftGLBB(perlambatan, percepatan) {
+    const currentTime = Date.now(); // Waktu saat ini dalam milidetik
+    // Inisialisasi saat fungsi pertama kali dipanggil
+    if (!moveLeftGLBB.hasBeenCalled) {
+      kecepatanGLBB = 0.05;
+      lastUpdateTime = currentTime; // Set waktu saat ini sebagai waktu terakhir update
+      moveLeftGLBB.hasBeenCalled = true;
+    }
+    // Periksa apakah sudah lebih dari 1 detik sejak update terakhir
+    akselerasi = percepatan - perlambatan;
+    if (akselerasi < 0) {
+      kecepatanGLBB = 0;
+    }
+    if (currentTime - lastUpdateTime >= 1000) {
+      kecepatanGLBB += akselerasi;
+      lastUpdateTime = currentTime;
+    }
+    tx -= kecepatanGLBB;
+
+    // Reset posisi jika melebihi batas
+    if (tx < TRANSLATE_LIMIT_L) {
+      tx = TRANSLATE_LIMIT_R;
+    }
+  }
+  // function moveLeftGLBB(acc) {
+  //   if (!moveLeftGLBB.hasBeenCalled) {
+  //     kecepatanGLBB = 0.0;
+  //   } else {
+  //     kecepatanGLBB += acc;
+  //     tx -= kecepatanGLBB;
+  //     if (tx < TRANSLATE_LIMIT_L) {
+  //       tx = TRANSLATE_LIMIT_R;
+  //     }
+  //   }
+  // }
 
   document.getElementById("Button1").addEventListener("click", function () {
     rightButton = true;
     leftButton = false;
     MoveRButton = false;
     MoveLButton = false;
+    MoveRGLBBButton = false;
+    MoveLGLBBButton = false;
+    moveRightGLBB.hasBeenCalled = false;
+    moveLeftGLBB.hasBeenCalled = false;
   });
   document.getElementById("Button2").addEventListener("click", function () {
     leftButton = true;
     rightButton = false;
     MoveRButton = false;
     MoveLButton = false;
+    MoveRGLBBButton = false;
+    MoveLGLBBButton = false;
+    moveRightGLBB.hasBeenCalled = false;
+    moveLeftGLBB.hasBeenCalled = false;
   });
   document.getElementById("Button3").addEventListener("click", function () {
     leftButton = false;
     rightButton = false;
     MoveRButton = false;
     MoveLButton = false;
+    MoveRGLBBButton = false;
+    MoveLGLBBButton = false;
+    moveRightGLBB.hasBeenCalled = false;
+    moveLeftGLBB.hasBeenCalled = false;
   });
 
   document.getElementById("Button4").addEventListener("click", function () {
@@ -131,12 +207,38 @@ var perspectiveExample = function () {
     rightButton = true;
     MoveRButton = true;
     MoveLButton = false;
+    MoveRGLBBButton = false;
+    MoveLGLBBButton = false;
+    moveRightGLBB.hasBeenCalled = false;
+    moveLeftGLBB.hasBeenCalled = false;
   });
   document.getElementById("Button5").addEventListener("click", function () {
     leftButton = true;
     rightButton = false;
     MoveRButton = false;
     MoveLButton = true;
+    MoveRGLBBButton = false;
+    MoveLGLBBButton = false;
+    moveRightGLBB.hasBeenCalled = false;
+    moveLeftGLBB.hasBeenCalled = false;
+  });
+  document.getElementById("Button6").addEventListener("click", function () {
+    leftButton = false;
+    rightButton = true;
+    MoveRButton = false;
+    MoveLButton = false;
+    MoveRGLBBButton = true;
+    MoveLGLBBButton = false;
+    moveLeftGLBB.hasBeenCalled = false;
+  });
+  document.getElementById("Button7").addEventListener("click", function () {
+    leftButton = true;
+    rightButton = false;
+    MoveRButton = false;
+    MoveLButton = false;
+    MoveRGLBBButton = false;
+    MoveLGLBBButton = true;
+    moveRightGLBB.hasBeenCalled = false;
   });
 
   function fives(a, b, c, d, e, f) {
@@ -215,7 +317,6 @@ var perspectiveExample = function () {
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "uModelViewMatrix");
     projectionMatrixLoc = gl.getUniformLocation(program, "uProjectionMatrix");
-    // rotatedMatrixLoc = gl.getUniformLocation(program, "rotatedMatrix");
 
     // buttons for viewing parameters
 
@@ -225,9 +326,13 @@ var perspectiveExample = function () {
   function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-
     const kecepatan = document.getElementById("ButtonKecepatan");
     const speedValue = parseFloat(kecepatan.value);
+    const percepatan = document.getElementById("ButtonPercepatan");
+    const accValue = parseFloat(percepatan.value);
+    const perlambatanValue = parseFloat(
+      document.getElementById("ButtonPerlambatan").value
+    );
     eye = vec3(
       radius * Math.sin(theta) * Math.cos(phi),
       radius * Math.sin(theta) * Math.sin(phi),
@@ -253,6 +358,12 @@ var perspectiveExample = function () {
     }
     if (MoveLButton) {
       moveLeft(speedValue);
+    }
+    if (MoveRGLBBButton) {
+      moveRightGLBB(perlambatanValue, accValue);
+    }
+    if (MoveLGLBBButton) {
+      moveLeftGLBB(perlambatanValue,accValue);
     }
 
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
