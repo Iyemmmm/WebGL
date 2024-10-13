@@ -121,7 +121,7 @@ var perspectiveExample = function () {
 
     // Periksa apakah sudah lebih dari 1 detik sejak update terakhir
     akselerasi = percepatan - perlambatan;
-    if (akselerasi < 0) {
+    if (kecepatanGLBB < 0) {
       kecepatanGLBB = 0;
     }
     if (currentTime - lastUpdateTime >= 1000) {
@@ -145,7 +145,7 @@ var perspectiveExample = function () {
     }
     // Periksa apakah sudah lebih dari 1 detik sejak update terakhir
     akselerasi = percepatan - perlambatan;
-    if (akselerasi < 0) {
+    if (kecepatanGLBB < 0) {
       kecepatanGLBB = 0;
     }
     if (currentTime - lastUpdateTime >= 1000) {
@@ -287,7 +287,7 @@ var perspectiveExample = function () {
 
     aspect = canvas.width / canvas.height;
 
-    gl.clearColor(1.0, 1.0, 1.0, 1.0);
+    gl.clearColor(1.0, 0.5, 0.0, 1.0);
 
     gl.enable(gl.DEPTH_TEST);
 
@@ -363,7 +363,7 @@ var perspectiveExample = function () {
       moveRightGLBB(perlambatanValue, accValue);
     }
     if (MoveLGLBBButton) {
-      moveLeftGLBB(perlambatanValue,accValue);
+      moveLeftGLBB(perlambatanValue, accValue);
     }
 
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
