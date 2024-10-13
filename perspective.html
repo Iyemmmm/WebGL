@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>WebGL ETS</title>
 
-    <link href="./style.css" rel="stylesheet">
+    <link href="./css/style.css" rel="stylesheet">
     <style>
         canvas {
             width: 100%;
@@ -22,6 +22,7 @@
 
 <body style="background-color: bisque;">
     <div class="fpsContainer">
+        <div class="member">Riyanda Cavin Sinambela 5025221100 | Willyam B.D. Simanihuruk 5025221121</div>
         <div class="fps">fps: <span id="fps">0</span></div>
         <div class="fps">canvas width: <span id="canvasWidth"></span></div>
         <div class="fps">canvas height: <span id="canvasHeight"></span></div>
@@ -40,84 +41,40 @@
     <input type="range" id="ButtonKecepatan" min="0" max="0.1" step="0.01" value="0.05"></input>
 
     <script id="vertex-shader" type="x-shader/x-vertex">
-#version 300 es
+        #version 300 es
 
-in  vec4 aPosition;
-in  vec4 aColor;
-out vec4 vColor;
+        in  vec4 aPosition;
+        in  vec4 aColor;
+        out vec4 vColor;
 
-uniform mat4 uModelViewMatrix;
-uniform mat4 uProjectionMatrix;
+        uniform mat4 uModelViewMatrix;
+        uniform mat4 uProjectionMatrix;
 
-void main()
-{
-    gl_Position = uProjectionMatrix * uModelViewMatrix * aPosition;
-    vColor = aColor;
-}
-</script>
+        void main()
+        {
+            gl_Position = uProjectionMatrix * uModelViewMatrix * aPosition;
+            vColor = aColor;
+        }
+    </script>
 
     <script id="fragment-shader" type="x-shader/x-fragment">
-#version 300 es
+        #version 300 es
 
-precision mediump float;
+        precision mediump float;
 
-in vec4 vColor;
-out vec4 fColor;
+        in vec4 vColor;
+        out vec4 fColor;
 
-void main() {
-    fColor = vColor;
-}
-</script>
-
-    <script src="initShaders.js"></script>
-    <script src="MVnew.js"></script>
-    <script src="perspective.js"></script>
-
-    <script>
-        const canvas = document.getElementById('gl-canvas');
-        const gl = canvas.getContext('webgl2');
-        const fpsDisplay = document.getElementById('fps');
-        const canvasWidthDisplay = document.getElementById('canvasWidth');
-        const canvasHeightDisplay = document.getElementById('canvasHeight');
-
-        let lastFrameTime = 0;
-        let frameCount = 0;
-
-        // Function to set canvas size based on window size
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;  // Full screen width
-            canvas.height = window.innerHeight; // Full screen height
-            canvasWidthDisplay.textContent = canvas.width;
-            canvasHeightDisplay.textContent = canvas.height;
-            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        void main() {
+            fColor = vColor;
         }
-
-        // Function to update FPS
-        function updateFPS(currentTime) {
-            const deltaTime = currentTime - lastFrameTime;
-            frameCount++;
-
-            if (deltaTime >= 1000) { // Update every second
-                const fps = (frameCount / (deltaTime / 1000)).toFixed(1);
-                fpsDisplay.textContent = fps;
-
-                // Reset for the next measurement
-                lastFrameTime = currentTime;
-                frameCount = 0;
-            }
-
-            requestAnimationFrame(updateFPS);
-        }
-
-        // Event listener to resize the canvas when the window is resized
-        window.addEventListener('resize', resizeCanvas);
-
-        // Initial canvas size setup
-        resizeCanvas();
-
-        // Start the FPS calculation
-        requestAnimationFrame(updateFPS);
     </script>
+
+    <script src="./js/initShaders.js"></script>
+    <script src="./js/MVnew.js"></script>
+    <script src="./js/perspective.js"></script>
+    <script src="./js/resize.js"></script>
+    <script src="./js/updateFPS.js"></script>
 </body>
 
 </html>
