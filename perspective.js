@@ -86,7 +86,11 @@ var perspectiveExample = function () {
   // var theta = 0.0;
   // var phi = 0.0;
   // var dr = (5.0 * Math.PI) / 180.0;
-
+  var tx = 0.0; // Translasi pada sumbu X
+  // Kecepatan translasi
+  var deltaTx = 0.05;
+  const TRANSLATE_LIMIT_R = 12.0;
+  const TRANSLATE_LIMIT_L = -12.0;
   var near = 0.1;
   var far = 100.0;
   var radius = 5.0;
@@ -104,19 +108,32 @@ var perspectiveExample = function () {
   var eye;
   var rightButton = false;
   var leftButton = false;
-  var stopButton = false;
+  var MoveRButton = false;
+  var MoveLButton = false;
   const at = vec3(0.0, 0.0, 0.0);
   const up = vec3(0.0, 1.0, 0.0);
 
   function rotateRight() {
     angle += 3.0;
-    theta += 0.005;
+    // theta += 0.005;
     rotatedMatrix = rotate(angle, [0, 0, 1]);
   }
   function rotateLeft() {
     angle -= 3.0;
-    theta -= 0.005;
+    // theta -= 0.005;
     rotatedMatrix = rotate(angle, [0, 0, 1]);
+  }
+  function moveRight() {
+    tx += deltaTx;
+    if (tx > TRANSLATE_LIMIT_R) {
+      tx = TRANSLATE_LIMIT_L;
+    }
+  }
+  function moveLeft() {
+    tx -= deltaTx;
+    if (tx < TRANSLATE_LIMIT_L) {
+      tx = TRANSLATE_LIMIT_R;
+    }
   }
   // function stop() {
   //   theta = 1.0;
@@ -125,17 +142,37 @@ var perspectiveExample = function () {
   document.getElementById("Button1").addEventListener("click", function () {
     rightButton = true;
     leftButton = false;
+    MoveRButton = false;
+    MoveLButton = false;
   });
   document.getElementById("Button2").addEventListener("click", function () {
     leftButton = true;
     rightButton = false;
+    MoveRButton = false;
+    MoveLButton = false;
   });
   document.getElementById("Button3").addEventListener("click", function () {
     leftButton = false;
     rightButton = false;
+    MoveRButton = false;
+    MoveLButton = false;
   });
 
-  function fives(a, b, c, d, e) {
+  document.getElementById("Button4").addEventListener("click", function () {
+    leftButton = false;
+    rightButton = true;
+    MoveRButton = true;
+    MoveLButton = false;
+  });
+  document.getElementById("Button5").addEventListener("click", function () {
+    leftButton = true;
+    rightButton = false;
+    MoveRButton = false;
+    MoveLButton = true;
+
+  });
+
+  function fives(a, b, c, d, e,f) {
     var indices = [
       a,
       b,
@@ -150,25 +187,25 @@ var perspectiveExample = function () {
 
     for (var i = 0; i < indices.length; ++i) {
       positions.push(vertices[indices[i]]);
-      colors.push(vertexColors[a]); // Use the color of the first vertex for solid colors
+      colors.push(vertexColors[f]); // Use the color of the first vertex for solid colors
     }
   }
 
   init();
 
   function colorCube() {
-    fives(0, 16, 2, 10, 8);
-    fives(0, 8, 4, 14, 12);
-    fives(16, 17, 1, 12, 0);
-    fives(1, 9, 11, 3, 17);
-    fives(1, 12, 14, 5, 9);
-    fives(2, 13, 15, 6, 10);
-    fives(13, 3, 17, 16, 2);
-    fives(3, 11, 7, 15, 13);
-    fives(4, 8, 10, 6, 18);
-    fives(14, 5, 19, 18, 4);
-    fives(5, 19, 7, 11, 9);
-    fives(15, 7, 19, 18, 6);
+    fives(0, 16, 2, 10, 8,1);
+    fives(0, 8, 4, 14, 12,2);
+    fives(16, 17, 1, 12, 0,3);
+    fives(1, 9, 11, 3, 17,4);
+    fives(1, 12, 14, 5, 9,5);
+    fives(2, 13, 15, 6, 10,6);
+    fives(13, 3, 17, 16, 2,0);
+    fives(3, 11, 7, 15, 13,8);
+    fives(4, 8, 10, 6, 18,9);
+    fives(14, 5, 19, 18, 4,10);
+    fives(5, 19, 7, 11, 9,11);
+    fives(15, 7, 19, 18, 6,12);
     // fives(0, 8, 10, 2, 16);
     // fives(0, 16, 17, 4, 12);
     // fives(0, 12, 13, 1, 8);
@@ -223,7 +260,7 @@ var perspectiveExample = function () {
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "uModelViewMatrix");
     projectionMatrixLoc = gl.getUniformLocation(program, "uProjectionMatrix");
-    rotatedMatrixLoc = gl.getUniformLocation(program, "rotatedMatrix");
+    // rotatedMatrixLoc = gl.getUniformLocation(program, "rotatedMatrix");
     rotatedMatrix = rotate(angle, [0, 0, 1]); 
 
     // buttons for viewing parameters
@@ -241,12 +278,13 @@ var perspectiveExample = function () {
       // 0,0,1
     );
 
+    var translationMatrix = translate(tx, 0.0, 0.0);
     modelViewMatrix = lookAt(eye, at, up);
     projectionMatrix = perspective(fovy, aspect, near, far);
+    modelViewMatrix = mult(modelViewMatrix, translationMatrix);
+    modelViewMatrix = mult(modelViewMatrix, rotatedMatrix);
     
 
-    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
-    gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
     
     if (rightButton) {
       rotateRight();
@@ -254,8 +292,16 @@ var perspectiveExample = function () {
     if (leftButton) {
       rotateLeft();
     }
+    if (MoveRButton) {
+      moveRight();
+    }
+    if (MoveLButton) {
+      moveLeft();
+    }
+    
+    gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
+    gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
     gl.uniformMatrix4fv(rotatedMatrixLoc, false, flatten(rotatedMatrix));
-
     gl.drawArrays(gl.TRIANGLES, 0, numPositions);
     requestAnimationFrame(render);
   }
