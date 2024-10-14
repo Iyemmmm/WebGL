@@ -12,9 +12,39 @@ var perspectiveExample = function () {
 
   var positions = [];
   var colors = [];
+  var normals = []; // Untuk shading yang solid
 
   const A = (1 + Math.sqrt(5)) / 2; // The golden ratio
   const B = 1 / A;
+
+  // Vertices for the top and bottom of the triangular prism
+  var verticesPrism = [
+    vec4(0.0, 1.0, 0.0, 1.0), // Puncak atas
+    vec4(-1.0, 0.0, 1.0, 1.0), // Kiri bawah (alas depan)
+    vec4(1.0, 0.0, 1.0, 1.0), // Kanan bawah (alas depan)
+    vec4(0.0, 1.0, -1.0, 1.0), // Puncak bawah (alas belakang)
+    vec4(-1.0, 0.0, -1.0, 1.0), // Kiri bawah (alas belakang)
+    vec4(1.0, 0.0, -1.0, 1.0), // Kanan bawah (alas belakang)
+  ];
+
+  // Colors for the triangular prism vertices
+  var vertexColorsPrism = [
+    vec4(1.0, 0.0, 0.0, 1.0), // Red for top front
+    vec4(0.0, 1.0, 0.0, 1.0), // Green for left bottom
+    vec4(0.0, 0.0, 1.0, 1.0), // Blue for right bottom
+    vec4(1.0, 1.0, 0.0, 1.0), // Yellow for top back
+    vec4(1.0, 0.0, 1.0, 1.0), // Magenta for left back
+    vec4(0.0, 1.0, 1.0, 1.0), // Cyan for right back
+  ];
+
+  // Colors for the cone vertices
+  var vertexColorsCone = [
+    vec4(1.0, 0.0, 0.0, 1.0), // Red for the tip
+    vec4(0.0, 1.0, 0.0, 1.0), // Green for the base vertices
+    vec4(0.0, 0.0, 1.0, 1.0), // Blue
+    vec4(1.0, 1.0, 0.0, 1.0), // Yellow
+    vec4(1.0, 0.0, 1.0, 1.0), // Magenta
+  ];
 
   var verticesDodecahedron = [
     vec4(1, 1, 1, 1.0),
@@ -132,6 +162,9 @@ var perspectiveExample = function () {
   var changeCube = false;
   var changeLimas = false;
   var changeBall = false;
+  var changeCone = false;
+  var changePrism = false;
+
   var tx = 0.0;
   var px = 0.0;
   var py = 0.0;
@@ -354,6 +387,8 @@ var perspectiveExample = function () {
       changeBall = false;
       changeCube = false;
       changeLimas = false;
+      changeCone = false;
+      changePrism = false;
       theta = 0.08;
       phi = -2;
     });
@@ -363,6 +398,8 @@ var perspectiveExample = function () {
     changeBall = false;
     changeDedocahedron = false;
     changeLimas = false;
+    changeCone = false;
+    changePrism = false;
     theta = 0.001;
     phi = -1;
   });
@@ -372,8 +409,10 @@ var perspectiveExample = function () {
     changeDedocahedron = false;
     changeCube = false;
     changeLimas = false;
-    theta = 0.1;
-    phi = -1;
+    changeCone = false;
+    changePrism = false;
+    theta = 0.3;
+    phi = 1; //makin besar makin besar bolanya
   });
   document.getElementById("limas").addEventListener("click", function () {
     currentShape = "pyramid";
@@ -381,34 +420,59 @@ var perspectiveExample = function () {
     changeBall = false;
     changeCube = false;
     changeDedocahedron = false;
+    changeCone = false;
+    changePrism = false;
     theta = 0.08;
     phi = -2;
   });
+  document.getElementById("kerucut").addEventListener("click", function () {
+    currentShape = "cone";
+    changeCone = true;
+    changeLimas = false;
+    changeBall = false;
+    changeCube = false;
+    changeDedocahedron = false;
+    changePrism = false;
+  });
+  document.getElementById("prisma").addEventListener("click", function () {
+    currentShape = "prism";
+    changePrism = true;
+    changeCone = false;
+    changeLimas = false;
+    changeBall = false;
+    changeCube = false;
+    changeDedocahedron = false;
+  });
 
-  function triangle(a, b, c) {
+  function trianglePyramid(a, b, c, colorIndex) {
     positions.push(verticesPyramid[a]);
     positions.push(verticesPyramid[b]);
     positions.push(verticesPyramid[c]);
 
-    colors.push(vertexColorsPyramid[a]);
-    colors.push(vertexColorsPyramid[b]);
-    colors.push(vertexColorsPyramid[c]);
+    var color = vertexColorsPyramid[colorIndex];
+    colors.push(color);
+    colors.push(color);
+    colors.push(color);
   }
 
-  function quadPyramid(a, b, c, d) {
+  function quadPyramid(a, b, c, d, colorIndex) {
     positions.push(verticesPyramid[a]);
-    colors.push(vertexColorsPyramid[a]);
+    colors.push(vertexColorsPyramid[colorIndex]);
+
     positions.push(verticesPyramid[b]);
-    colors.push(vertexColorsPyramid[a]);
+    colors.push(vertexColorsPyramid[colorIndex]);
+
     positions.push(verticesPyramid[c]);
-    colors.push(vertexColorsPyramid[a]);
+    colors.push(vertexColorsPyramid[colorIndex]);
 
     positions.push(verticesPyramid[a]);
-    colors.push(vertexColorsPyramid[a]);
+    colors.push(vertexColorsPyramid[colorIndex]);
+
     positions.push(verticesPyramid[c]);
-    colors.push(vertexColorsPyramid[a]);
+    colors.push(vertexColorsPyramid[colorIndex]);
+
     positions.push(verticesPyramid[d]);
-    colors.push(vertexColorsPyramid[a]);
+    colors.push(vertexColorsPyramid[colorIndex]);
   }
 
   function createPyramid() {
@@ -416,24 +480,25 @@ var perspectiveExample = function () {
     colors = [];
 
     // 4 sisi segitiga
-    triangle(0, 1, 2); // sisi depan
-    triangle(0, 2, 3); // sisi kanan
-    triangle(0, 3, 4); // sisi belakang
-    triangle(0, 4, 1); // sisi kiri
+    trianglePyramid(0, 1, 2, 0); // sisi depan
+    trianglePyramid(0, 2, 3, 1); // sisi kanan
+    trianglePyramid(0, 3, 4, 2); // sisi belakang
+    trianglePyramid(0, 4, 1, 3); // sisi kiri
 
     // Sisi alas persegi
-    quadPyramid(1, 4, 3, 2); // alas
+    quadPyramid(1, 4, 3, 2, 4); // alas
 
     numPositions = positions.length;
+    console.log(numPositions);
 
     updateBuffer();
     // render();
   }
 
   function createSphere(latitudeBands, longitudeBands, radius) {
-    var positions = [];
-    var colors = [];
-    var normals = []; // Untuk shading yang solid
+    positions = [];
+    colors = [];
+    normals = []; // Untuk shading yang solid
 
     for (var latNumber = 0; latNumber <= latitudeBands; latNumber++) {
       var theta = (latNumber * Math.PI) / latitudeBands;
@@ -449,16 +514,13 @@ var perspectiveExample = function () {
         var y = cosTheta;
         var z = sinPhi * sinTheta;
 
-        var u = 1 - longNumber / longitudeBands;
-        var v = 1 - latNumber / latitudeBands;
-
         positions.push(vec4(radius * x, radius * y, radius * z, 1.0));
 
         // Normal untuk shading yang solid
         normals.push(vec3(x, y, z));
 
-        colors.push(vec4(0, 0.0, 0.0, 1.0)); // Warna merah
-        // colors.push(vec4(Math.abs(x), Math.abs(y), Math.abs(z), 1.0)); // Warna sesuai posisi untuk gradien
+        // colors.push(vec4(0, 0.0, 0.0, 1.0)); // Warna merah
+        colors.push(vec4(Math.abs(x), Math.abs(y), Math.abs(z), 1.0)); // Warna sesuai posisi untuk gradien
       }
     }
 
@@ -496,10 +558,60 @@ var perspectiveExample = function () {
     colors = sphereData.colors;
 
     numPositions = positions.length;
+    console.log(numPositions);
 
     updateBuffer();
 
     // render(); // Panggil render setelah buffer diisi ulang
+  }
+
+  // Fungsi untuk membuat kerucut dengan alas lingkaran
+  function createCone() {
+    positions = [];
+    colors = [];
+
+    const numSegments = 30; // Jumlah segmen untuk membentuk alas lingkaran
+    const radius = 1.0; // Radius alas kerucut
+    const height = 2.0; // Tinggi kerucut
+
+    // Titik puncak kerucut
+    const tip = vec4(0.0, height, 0.0, 1.0);
+
+    // Iterasi untuk membuat alas lingkaran
+    for (let i = 0; i < numSegments; i++) {
+      const theta = (i / numSegments) * 2 * Math.PI;
+      const nextTheta = ((i + 1) / numSegments) * 2 * Math.PI;
+
+      const x1 = radius * Math.cos(theta);
+      const z1 = radius * Math.sin(theta);
+      const x2 = radius * Math.cos(nextTheta);
+      const z2 = radius * Math.sin(nextTheta);
+
+      // Buat sisi segitiga antara titik puncak dan dua titik pada alas
+      positions.push(tip);
+      colors.push(vertexColorsCone[0]);
+
+      positions.push(vec4(x1, 0.0, z1, 1.0));
+      colors.push(vertexColorsCone[1]);
+
+      positions.push(vec4(x2, 0.0, z2, 1.0));
+      colors.push(vertexColorsCone[2]);
+
+      // Buat alas lingkaran sebagai dua segmen
+      positions.push(vec4(0.0, 0.0, 0.0, 1.0)); // Titik tengah alas
+      colors.push(vertexColorsCone[3]);
+
+      positions.push(vec4(x1, 0.0, z1, 1.0));
+      colors.push(vertexColorsCone[4]);
+
+      positions.push(vec4(x2, 0.0, z2, 1.0));
+      colors.push(vertexColorsCone[4]);
+    }
+
+    numPositions = positions.length;
+    console.log(numPositions);
+
+    updateBuffer();
   }
 
   function fives(a, b, c, d, e, f) {
@@ -562,6 +674,7 @@ var perspectiveExample = function () {
     quadCube(5, 4, 0, 1);
 
     numPositions = positions.length;
+    console.log(numPositions);
 
     updateBuffer();
 
@@ -586,16 +699,73 @@ var perspectiveExample = function () {
     fives(15, 7, 19, 18, 6, 12);
 
     numPositions = positions.length;
-
+    console.log(numPositions);
     updateBuffer();
 
     // render(); // Panggil render setelah buffer diisi ulang
   }
 
+  // Helper function to create triangles
+  function trianglePrism(a, b, c, colorIndex) {
+    positions.push(verticesPrism[a]);
+    positions.push(verticesPrism[b]);
+    positions.push(verticesPrism[c]);
+
+    // Warna yang sama untuk setiap vertex pada sisi segitiga
+    var color = vertexColorsPrism[colorIndex];
+    colors.push(color);
+    colors.push(color);
+    colors.push(color);
+  }
+
+  // Helper function to create quads (rectangular sides)
+  function quadPrism(a, b, c, d, colorIndex) {
+    positions.push(verticesPrism[a]);
+    colors.push(vertexColorsPrism[colorIndex]); // Warna yang sama untuk semua vertex
+
+    positions.push(verticesPrism[b]);
+    colors.push(vertexColorsPrism[colorIndex]);
+
+    positions.push(verticesPrism[c]);
+    colors.push(vertexColorsPrism[colorIndex]);
+
+    positions.push(verticesPrism[a]);
+    colors.push(vertexColorsPrism[colorIndex]);
+
+    positions.push(verticesPrism[c]);
+    colors.push(vertexColorsPrism[colorIndex]);
+
+    positions.push(verticesPrism[d]);
+    colors.push(vertexColorsPrism[colorIndex]);
+  }
+
+  // Function to create the triangular prism
+  function createTriangularPrism() {
+    positions = [];
+    colors = [];
+
+    // Front face (triangle) - Warna merah
+    trianglePrism(0, 1, 2, 0); // Sisi depan
+
+    // Back face (triangle) - Warna hijau
+    trianglePrism(3, 4, 5, 1); // Sisi belakang
+
+    // Side faces (connecting front and back) - Warna yang berbeda
+    quadPrism(0, 1, 4, 3, 2); // Sisi kiri - Biru
+    quadPrism(0, 2, 5, 3, 5); // Sisi kanan - Cyan
+    quadPrism(1, 2, 5, 4, 4); // Sisi bawah - Magenta
+
+    numPositions = positions.length;
+    console.log(numPositions);
+
+    updateBuffer();
+  }
+
   function init() {
     canvas = document.getElementById("gl-canvas");
 
-    gl = canvas.getContext("webgl2");
+    // gl = canvas.getContext("webgl2");
+    gl = canvas.getContext("webgl2", { antialias: true });
     if (!gl) alert("WebGL 2.0 isn't available");
 
     gl.viewport(0, 0, canvas.width, canvas.height);
@@ -693,6 +863,12 @@ var perspectiveExample = function () {
     if (changeLimas) {
       createPyramid();
     }
+    if (changeCone) {
+      createCone();
+    }
+    if (changePrism) {
+      createTriangularPrism();
+    }
 
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
@@ -710,6 +886,20 @@ var perspectiveExample = function () {
       console.log(currentShape);
       gl.drawArrays(gl.TRIANGLES, 0, numPositions);
     } else if (currentShape === "pyramid") {
+      // Gambar limas segi empat
+      console.log(currentShape);
+      gl.drawArrays(gl.TRIANGLES, 0, numPositions);
+    } else if (currentShape === "cone") {
+      // Gambar limas segi empat
+      // if (MoveRButton || MoveRGLBBButton || parabolaButton) {
+      //   rightButton = false;
+      // }
+      // if (MoveLButton || MoveLGLBBButton) {
+      //   leftButton = false;
+      // }
+      console.log(currentShape);
+      gl.drawArrays(gl.TRIANGLES, 0, numPositions);
+    } else if (currentShape === "prism") {
       // Gambar limas segi empat
       console.log(currentShape);
       gl.drawArrays(gl.TRIANGLES, 0, numPositions);
