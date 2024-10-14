@@ -107,11 +107,11 @@ var perspectiveExample = function () {
   var near = 0.2;
   var far = 10.0;
   var radius = 8.0;
-  var theta = 0.08;
+  var theta = 0.0;
   var angle = 0.0;
   // -1.0471975511965976
   // var phi = 1.570796326794896;
-  var phi = -2;
+  var phi = 0.0;
   var dr = (5.0 * Math.PI) / 180.0;
 
   var fovy = 60.0; // Field-of-view in Y direction angle (in degrees)
@@ -128,6 +128,10 @@ var perspectiveExample = function () {
   var MoveLGLBBButton = false;
   var buttonParabola = false;
   var parabolaButton = false;
+  var changeDedocahedron = false;
+  var changeCube = false;
+  var changeLimas = false;
+  var changeBall = false;
   var tx = 0.0;
   var px = 0.0;
   var py = 0.0;
@@ -346,19 +350,39 @@ var perspectiveExample = function () {
     .getElementById("dodecahedron")
     .addEventListener("click", function () {
       currentShape = "dodecahedron";
-      colorDodecahedron();
+      changeDedocahedron = true;
+      changeBall = false;
+      changeCube = false;
+      changeLimas = false;
+      theta = 0.08;
+      phi = -2;
     });
   document.getElementById("kubus").addEventListener("click", function () {
     currentShape = "cube";
-    colorCube();
+    changeCube = true;
+    changeBall = false;
+    changeDedocahedron = false;
+    changeLimas = false;
+    theta = 0.001;
+    phi = -1;
   });
   document.getElementById("bola").addEventListener("click", function () {
     currentShape = "sphere";
-    colorSphere();
+    changeBall = true;
+    changeDedocahedron = false;
+    changeCube = false;
+    changeLimas = false;
+    theta = 0.1;
+    phi = -1;
   });
   document.getElementById("limas").addEventListener("click", function () {
     currentShape = "pyramid";
-    createPyramid();
+    changeLimas = true;
+    changeBall = false;
+    changeCube = false;
+    changeDedocahedron = false;
+    theta = 0.08;
+    phi = -2;
   });
 
   function triangle(a, b, c) {
@@ -403,7 +427,7 @@ var perspectiveExample = function () {
     numPositions = positions.length;
 
     updateBuffer();
-    render();
+    // render();
   }
 
   function createSphere(latitudeBands, longitudeBands, radius) {
@@ -433,7 +457,7 @@ var perspectiveExample = function () {
         // Normal untuk shading yang solid
         normals.push(vec3(x, y, z));
 
-        colors.push(vec4(0.0, 0.0, 0.0, 1.0)); // Warna merah
+        colors.push(vec4(0, 0.0, 0.0, 1.0)); // Warna merah
         // colors.push(vec4(Math.abs(x), Math.abs(y), Math.abs(z), 1.0)); // Warna sesuai posisi untuk gradien
       }
     }
@@ -475,7 +499,7 @@ var perspectiveExample = function () {
 
     updateBuffer();
 
-    render(); // Panggil render setelah buffer diisi ulang
+    // render(); // Panggil render setelah buffer diisi ulang
   }
 
   function fives(a, b, c, d, e, f) {
@@ -541,7 +565,7 @@ var perspectiveExample = function () {
 
     updateBuffer();
 
-    render(); // Panggil render setelah buffer diisi ulang
+    // render(); // Panggil render setelah buffer diisi ulang
   }
 
   function colorDodecahedron() {
@@ -565,7 +589,7 @@ var perspectiveExample = function () {
 
     updateBuffer();
 
-    render(); // Panggil render setelah buffer diisi ulang
+    // render(); // Panggil render setelah buffer diisi ulang
   }
 
   function init() {
@@ -656,6 +680,18 @@ var perspectiveExample = function () {
     }
     if (parabolaButton) {
       parabolic(parabolaValue);
+    }
+    if (changeDedocahedron) {
+      colorDodecahedron();
+    }
+    if (changeCube) {
+      colorCube();
+    }
+    if (changeBall) {
+      colorSphere();
+    }
+    if (changeLimas) {
+      createPyramid();
     }
 
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
