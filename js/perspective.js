@@ -16,7 +16,7 @@ var perspectiveExample = function () {
   const A = (1 + Math.sqrt(5)) / 2; // The golden ratio
   const B = 1 / A;
 
-  var vertices = [
+  var verticesDodecahedron = [
     vec4(1, 1, 1, 1.0),
     vec4(1, 1, -1, 1.0),
     vec4(1, -1, 1, 1.0),
@@ -39,7 +39,7 @@ var perspectiveExample = function () {
     vec4(-A, 0, -B, 1.0),
   ];
 
-  var vertexColors = [
+  var vertexColorsDodecahedron = [
     vec4(0.0, 0.0, 0.0, 1.0), // black
     vec4(1.0, 0.0, 0.0, 1.0), // red
     vec4(1.0, 1.0, 0.0, 1.0), // yellow
@@ -60,6 +60,44 @@ var perspectiveExample = function () {
     vec4(0.0, 1.0, 0.5, 1.0), // aqua
     vec4(1.0, 0.0, 0.5, 1.0), // pink
     vec4(0.5, 0.0, 1.0, 1.0), // violet
+  ];
+
+  var verticesCube = [
+    vec4(-0.5, -0.5, 1.5, 1.0),
+    vec4(-0.5, 0.5, 1.5, 1.0),
+    vec4(0.5, 0.5, 1.5, 1.0),
+    vec4(0.5, -0.5, 1.5, 1.0),
+    vec4(-0.5, -0.5, 0.5, 1.0),
+    vec4(-0.5, 0.5, 0.5, 1.0),
+    vec4(0.5, 0.5, 0.5, 1.0),
+    vec4(0.5, -0.5, 0.5, 1.0),
+  ];
+
+  var vertexColorsCube = [
+    vec4(0.0, 0.0, 0.0, 1.0), // black
+    vec4(1.0, 0.0, 0.0, 1.0), // red
+    vec4(1.0, 1.0, 0.0, 1.0), // yellow
+    vec4(0.0, 1.0, 0.0, 1.0), // green
+    vec4(0.0, 0.0, 1.0, 1.0), // blue
+    vec4(1.0, 0.0, 1.0, 1.0), // magenta
+    vec4(0.0, 1.0, 1.0, 1.0), // cyan
+    vec4(1.0, 1.0, 1.0, 1.0), // white
+  ];
+
+  var verticesPyramid = [
+    vec4(0.0, 1.0, 0.0, 1.0), // Puncak
+    vec4(-1.0, -1.0, 1.0, 1.0), // Alas kiri depan
+    vec4(1.0, -1.0, 1.0, 1.0), // Alas kanan depan
+    vec4(1.0, -1.0, -1.0, 1.0), // Alas kanan belakang
+    vec4(-1.0, -1.0, -1.0, 1.0), // Alas kiri belakang
+  ];
+
+  var vertexColorsPyramid = [
+    vec4(1.0, 0.0, 0.0, 1.0), // Merah untuk puncak
+    vec4(0.0, 1.0, 0.0, 1.0), // Hijau untuk alas kiri depan
+    vec4(0.0, 0.0, 1.0, 1.0), // Biru untuk alas kanan depan
+    vec4(1.0, 1.0, 0.0, 1.0), // Kuning untuk alas kanan belakang
+    vec4(1.0, 0.0, 1.0, 1.0), // Magenta untuk alas kiri belakang
   ];
 
   // Translasi pada sumbu X
@@ -310,6 +348,135 @@ var perspectiveExample = function () {
       currentShape = "dodecahedron";
       colorDodecahedron();
     });
+  document.getElementById("kubus").addEventListener("click", function () {
+    currentShape = "cube";
+    colorCube();
+  });
+  document.getElementById("bola").addEventListener("click", function () {
+    currentShape = "sphere";
+    colorSphere();
+  });
+  document.getElementById("limas").addEventListener("click", function () {
+    currentShape = "pyramid";
+    createPyramid();
+  });
+
+  function triangle(a, b, c) {
+    positions.push(verticesPyramid[a]);
+    positions.push(verticesPyramid[b]);
+    positions.push(verticesPyramid[c]);
+
+    colors.push(vertexColorsPyramid[a]);
+    colors.push(vertexColorsPyramid[b]);
+    colors.push(vertexColorsPyramid[c]);
+  }
+
+  function quadPyramid(a, b, c, d) {
+    positions.push(verticesPyramid[a]);
+    colors.push(vertexColorsPyramid[a]);
+    positions.push(verticesPyramid[b]);
+    colors.push(vertexColorsPyramid[a]);
+    positions.push(verticesPyramid[c]);
+    colors.push(vertexColorsPyramid[a]);
+
+    positions.push(verticesPyramid[a]);
+    colors.push(vertexColorsPyramid[a]);
+    positions.push(verticesPyramid[c]);
+    colors.push(vertexColorsPyramid[a]);
+    positions.push(verticesPyramid[d]);
+    colors.push(vertexColorsPyramid[a]);
+  }
+
+  function createPyramid() {
+    positions = [];
+    colors = [];
+
+    // 4 sisi segitiga
+    triangle(0, 1, 2); // sisi depan
+    triangle(0, 2, 3); // sisi kanan
+    triangle(0, 3, 4); // sisi belakang
+    triangle(0, 4, 1); // sisi kiri
+
+    // Sisi alas persegi
+    quadPyramid(1, 4, 3, 2); // alas
+
+    numPositions = positions.length;
+
+    updateBuffer();
+    render();
+  }
+
+  function createSphere(latitudeBands, longitudeBands, radius) {
+    var positions = [];
+    var colors = [];
+    var normals = []; // Untuk shading yang solid
+
+    for (var latNumber = 0; latNumber <= latitudeBands; latNumber++) {
+      var theta = (latNumber * Math.PI) / latitudeBands;
+      var sinTheta = Math.sin(theta);
+      var cosTheta = Math.cos(theta);
+
+      for (var longNumber = 0; longNumber <= longitudeBands; longNumber++) {
+        var phi = (longNumber * 2 * Math.PI) / longitudeBands;
+        var sinPhi = Math.sin(phi);
+        var cosPhi = Math.cos(phi);
+
+        var x = cosPhi * sinTheta;
+        var y = cosTheta;
+        var z = sinPhi * sinTheta;
+
+        var u = 1 - longNumber / longitudeBands;
+        var v = 1 - latNumber / latitudeBands;
+
+        positions.push(vec4(radius * x, radius * y, radius * z, 1.0));
+
+        // Normal untuk shading yang solid
+        normals.push(vec3(x, y, z));
+
+        colors.push(vec4(0.0, 0.0, 0.0, 1.0)); // Warna merah
+        // colors.push(vec4(Math.abs(x), Math.abs(y), Math.abs(z), 1.0)); // Warna sesuai posisi untuk gradien
+      }
+    }
+
+    var indices = [];
+
+    for (var latNumber = 0; latNumber < latitudeBands; latNumber++) {
+      for (var longNumber = 0; longNumber < longitudeBands; longNumber++) {
+        var first = latNumber * (longitudeBands + 1) + longNumber;
+        var second = first + longitudeBands + 1;
+
+        indices.push(first);
+        indices.push(second);
+        indices.push(first + 1);
+
+        indices.push(second);
+        indices.push(second + 1);
+        indices.push(first + 1);
+      }
+    }
+
+    return {
+      positions: positions,
+      normals: normals,
+      indices: indices,
+      colors: colors,
+    };
+  }
+
+  function colorSphere() {
+    positions = [];
+    colors = [];
+
+    var sphereData = createSphere(30, 30, 1.0); // 30 segmen latitude, 30 segmen longitude, radius 1.0
+    positions = sphereData.positions;
+    colors = sphereData.colors;
+
+    numPositions = positions.length;
+
+    updateBuffer();
+
+    render(); // Panggil render setelah buffer diisi ulang
+  }
 
   function fives(a, b, c, d, e, f) {
     var indices = [
@@ -325,12 +492,62 @@ var perspectiveExample = function () {
     ];
 
     for (var i = 0; i < indices.length; ++i) {
-      positions.push(vertices[indices[i]]);
-      colors.push(vertexColors[f]); // Use the color of the first vertex for solid colors
+      positions.push(verticesDodecahedron[indices[i]]);
+      colors.push(vertexColorsDodecahedron[f]); // Use the color of the first vertex for solid colors
     }
   }
 
+  function quadCube(a, b, c, d) {
+    positions.push(verticesCube[a]);
+    colors.push(vertexColorsCube[a]);
+    positions.push(verticesCube[b]);
+    colors.push(vertexColorsCube[a]);
+    positions.push(verticesCube[c]);
+    colors.push(vertexColorsCube[a]);
+    positions.push(verticesCube[a]);
+    colors.push(vertexColorsCube[a]);
+    positions.push(verticesCube[c]);
+    colors.push(vertexColorsCube[a]);
+    positions.push(verticesCube[d]);
+    colors.push(vertexColorsCube[a]);
+  }
+
+  function updateBuffer() {
+    // Buffer posisi
+    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(positions), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(positionLoc, 4, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(positionLoc);
+
+    // Buffer warna
+    gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(colorLoc, 4, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(colorLoc);
+  }
+
+  function colorCube() {
+    positions = [];
+    colors = [];
+
+    quadCube(1, 0, 3, 2);
+    quadCube(2, 3, 7, 6);
+    quadCube(3, 0, 4, 7);
+    quadCube(6, 5, 1, 2);
+    quadCube(4, 5, 6, 7);
+    quadCube(5, 4, 0, 1);
+
+    numPositions = positions.length;
+
+    updateBuffer();
+
+    render(); // Panggil render setelah buffer diisi ulang
+  }
+
   function colorDodecahedron() {
+    positions = [];
+    colors = [];
+
     fives(0, 16, 2, 10, 8, 1);
     fives(0, 8, 4, 14, 12, 2);
     fives(16, 17, 1, 12, 0, 3);
@@ -344,33 +561,9 @@ var perspectiveExample = function () {
     fives(5, 19, 7, 11, 9, 11);
     fives(15, 7, 19, 18, 6, 12);
 
-    // var cBuffer = gl.createBuffer();
-    // gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
-    // gl.bufferData(gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW);
+    numPositions = positions.length;
 
-    // var colorLoc = gl.getAttribLocation(program, "aColor");
-    // gl.vertexAttribPointer(colorLoc, 4, gl.FLOAT, false, 0, 0);
-    // gl.enableVertexAttribArray(colorLoc);
-
-    // var vBuffer = gl.createBuffer();
-    // gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    // gl.bufferData(gl.ARRAY_BUFFER, flatten(positions), gl.STATIC_DRAW);
-
-    // var positionLoc = gl.getAttribLocation(program, "aPosition");
-    // gl.vertexAttribPointer(positionLoc, 4, gl.FLOAT, false, 0, 0);
-    // gl.enableVertexAttribArray(positionLoc);
-
-    // Buffer posisi
-    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(positions), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(positionLoc, 4, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(positionLoc);
-
-    // Buffer warna
-    gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(colorLoc, 4, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(colorLoc);
+    updateBuffer();
 
     render(); // Panggil render setelah buffer diisi ulang
   }
@@ -395,7 +588,7 @@ var perspectiveExample = function () {
     var program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
 
-    colorDodecahedron();
+    // colorDodecahedron();
 
     // Buat buffer tapi jangan isi datanya
     vBuffer = gl.createBuffer();
@@ -470,11 +663,22 @@ var perspectiveExample = function () {
     gl.uniformMatrix4fv(rotatedMatrixLoc, false, flatten(rotatedMatrix));
     if (currentShape === "cube") {
       // Gambar Kubus
+      console.log(currentShape);
       gl.drawArrays(gl.TRIANGLES, 0, numPositions);
     } else if (currentShape === "dodecahedron") {
       // Gambar Dodecahedron
+      console.log(currentShape);
+      gl.drawArrays(gl.TRIANGLES, 0, numPositions);
+    } else if (currentShape === "sphere") {
+      // Gambar sphere;
+      console.log(currentShape);
+      gl.drawArrays(gl.TRIANGLES, 0, numPositions);
+    } else if (currentShape === "pyramid") {
+      // Gambar limas segi empat
+      console.log(currentShape);
       gl.drawArrays(gl.TRIANGLES, 0, numPositions);
     }
+
     requestAnimationFrame(render);
   }
   init();
