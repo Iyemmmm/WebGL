@@ -3,7 +3,7 @@
 var perspectiveExample = function () {
   var canvas;
   var gl;
-  var program;
+
   var currentShape = ""; // Tidak ada objek yang tampil saat awal
   var numPositions = 108;
   var vBuffer, cBuffer; // Buffer untuk posisi
@@ -13,6 +13,13 @@ var perspectiveExample = function () {
   var positions = [];
   var colors = [];
   var normals = []; // Untuk shading yang solid
+  let dragging = false;
+  let lastX = 0,
+    lastY = 0;
+  let rotationX = 0,
+    rotationY = 0;
+  let rotatedXDrag=rotateX(0.0,0.0,0.0);
+  let rotatedYDrag=rotateY(0.0,0.0,0.0);
 
   const A = (1 + Math.sqrt(5)) / 2; // The golden ratio
   const B = 1 / A;
@@ -134,20 +141,22 @@ var perspectiveExample = function () {
   // Kecepatan translasi
   const TRANSLATE_LIMIT_R = 18.0;
   const TRANSLATE_LIMIT_L = -18.0;
-  var near = 0.2;
-  var far = 10.0;
+  var near = 0.1;
+  var far = 100.0;
   var radius = 8.0;
   var theta = 0.0;
   var angle = 0.0;
   // -1.0471975511965976
   // var phi = 1.570796326794896;
   var phi = 0.0;
+  var dr = (5.0 * Math.PI) / 180.0;
 
   var fovy = 60.0; // Field-of-view in Y direction angle (in degrees)
   var aspect; // Viewport aspect ratio
 
   var modelViewMatrixLoc, projectionMatrixLoc, rotatedMatrixLoc;
   var modelViewMatrix, projectionMatrix, rotatedMatrix;
+
   var eye;
   var rightButton = false;
   var leftButton = false;
@@ -513,15 +522,12 @@ var perspectiveExample = function () {
         var y = cosTheta;
         var z = sinPhi * sinTheta;
 
-        // Tambahkan posisi vertex
         positions.push(vec4(radius * x, radius * y, radius * z, 1.0));
 
         // Normal untuk shading yang solid
-        // Tambahkan normal untuk setiap vertex
         normals.push(vec3(x, y, z));
 
         // colors.push(vec4(0, 0.0, 0.0, 1.0)); // Warna merah
-        // Warna sesuai dengan posisi vertex
         colors.push(vec4(Math.abs(x), Math.abs(y), Math.abs(z), 1.0)); // Warna sesuai posisi untuk gradien
       }
     }
@@ -554,12 +560,10 @@ var perspectiveExample = function () {
   function colorSphere() {
     positions = [];
     colors = [];
-    normals = [];
 
     var sphereData = createSphere(30, 30, 1.0); // 30 segmen latitude, 30 segmen longitude, radius 1.0
     positions = sphereData.positions;
     colors = sphereData.colors;
-    normals = sphereData.normals; // Gunakan normal dari sphereData
 
     numPositions = positions.length;
     console.log(numPositions);
@@ -695,7 +699,7 @@ var perspectiveExample = function () {
     fives(1, 9, 11, 3, 17, 4);
     fives(1, 12, 14, 5, 9, 5);
     fives(2, 13, 15, 6, 10, 6);
-    fives(13, 3, 17, 16, 2, 0);
+    fives(13, 3, 17, 16, 2, 13);
     fives(3, 11, 7, 15, 13, 8);
     fives(4, 8, 10, 6, 18, 9);
     fives(14, 5, 19, 18, 4, 10);
@@ -776,14 +780,14 @@ var perspectiveExample = function () {
 
     aspect = canvas.width / canvas.height;
 
-    gl.clearColor(1.0, 0.5, 0.0, 1.0); // Background color
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
-    gl.enable(gl.DEPTH_TEST); // Enable depth testing
+    gl.enable(gl.DEPTH_TEST);
 
     //
     //  Load shaders and initialize attribute buffers
     //
-    program = initShaders(gl, "vertex-shader", "fragment-shader");
+    var program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
 
     // colorDodecahedron();
@@ -791,17 +795,15 @@ var perspectiveExample = function () {
     // Buat buffer tapi jangan isi datanya
     vBuffer = gl.createBuffer();
     cBuffer = gl.createBuffer();
-    // nBuffer = gl.createBuffer();
 
-    // Get locations of attributes and uniforms
     positionLoc = gl.getAttribLocation(program, "aPosition");
     colorLoc = gl.getAttribLocation(program, "aColor");
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "uModelViewMatrix");
     projectionMatrixLoc = gl.getUniformLocation(program, "uProjectionMatrix");
-    rotatedMatrixLoc = gl.getUniformLocation(program, "uNormalMatrix");
 
-    // Set up event listeners and initial render
+    // buttons for viewing parameters
+
     render(); // Render awal (kosong) hanya untuk membersihkan layar
   }
 
@@ -824,6 +826,38 @@ var perspectiveExample = function () {
       radius * Math.cos(theta)
       // 0,0,1
     );
+    canvas.addEventListener("mousedown", (event) => {
+      dragging = true;
+      lastX = event.clientX;
+      lastY = event.clientY;
+    });
+
+    canvas.addEventListener("mousemove", (event) => {
+      if (dragging) {
+        let deltaX = event.clientX - lastX;
+        let deltaY = event.clientY - lastY;
+
+        rotationY += deltaX ; // Adjust rotation speed as needed
+        rotationX += deltaY ;
+
+        lastX = event.clientX;
+        lastY = event.clientY;
+
+        console.log("X", rotationX);
+        console.log("Y", rotationY);
+
+        rotatedXDrag = rotateX(rotationX, 0.0, 0.0);
+        rotatedYDrag = rotateY(rotationY, 0.0, 0.0);
+      }
+    });
+
+    canvas.addEventListener("mouseup", () => {
+      dragging = false;
+    });
+
+    canvas.addEventListener("mouseleave", () => {
+      dragging = false;
+    });
 
     var posisiawal = translate(-6, 0.0, 0.0);
     var translationMatrix = translate(tx, 0.0, 0.0);
@@ -835,6 +869,8 @@ var perspectiveExample = function () {
     modelViewMatrix = mult(modelViewMatrix, parabolicMatrix);
     modelViewMatrix = mult(modelViewMatrix, translationMatrix);
     modelViewMatrix = mult(modelViewMatrix, rotatedMatrix);
+    modelViewMatrix = mult(modelViewMatrix, rotatedXDrag);
+    modelViewMatrix = mult(modelViewMatrix, rotatedYDrag);
 
     if (rightButton) {
       rotateRight();
