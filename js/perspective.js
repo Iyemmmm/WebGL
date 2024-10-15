@@ -18,20 +18,20 @@ var perspectiveExample = function () {
     lastY = 0;
   let rotationX = 0,
     rotationY = 0;
-  let rotatedXDrag=rotateX(0.0,0.0,0.0);
-  let rotatedYDrag=rotateY(0.0,0.0,0.0);
+  let rotatedXDrag = rotateX(0.0, 0.0, 0.0);
+  let rotatedYDrag = rotateY(0.0, 0.0, 0.0);
 
   const A = (1 + Math.sqrt(5)) / 2; // The golden ratio
   const B = 1 / A;
 
   // Vertices for the top and bottom of the triangular prism
   var verticesPrism = [
-    vec4(0.0, 1.0, 0.0, 1.0), // Puncak atas
-    vec4(-1.0, 0.0, 1.0, 1.0), // Kiri bawah (alas depan)
-    vec4(1.0, 0.0, 1.0, 1.0), // Kanan bawah (alas depan)
-    vec4(0.0, 1.0, -1.0, 1.0), // Puncak bawah (alas belakang)
-    vec4(-1.0, 0.0, -1.0, 1.0), // Kiri bawah (alas belakang)
-    vec4(1.0, 0.0, -1.0, 1.0), // Kanan bawah (alas belakang)
+    vec4(-1.0, 0.0, 2.0, 1.0), // Front left (base of triangle)
+    vec4(1.0, 0.0, 2.0, 1.0), // Front right (base of triangle)
+    vec4(0.0, 1.0, 2.0, 1.0), // Front peak (top of triangle)
+    vec4(-1.0, 0.0, -2.0, 1.0), // Back left (base of back triangle)
+    vec4(1.0, 0.0, -2.0, 1.0), // Back right (base of back triangle)
+    vec4(0.0, 1.0, -2.0, 1.0), // Back peak (top of back triangle)
   ];
 
   // Colors for the triangular prism vertices
@@ -759,9 +759,9 @@ var perspectiveExample = function () {
     trianglePrism(3, 4, 5, 1); // Sisi belakang
 
     // Side faces (connecting front and back) - Warna yang berbeda
-    quadPrism(0, 1, 4, 3, 2); // Sisi kiri - Biru
-    quadPrism(0, 2, 5, 3, 5); // Sisi kanan - Cyan
-    quadPrism(1, 2, 5, 4, 4); // Sisi bawah - Magenta
+    quadPrism(0, 1, 4, 3, 2); // Bottom face (connects front and back base)
+    quadPrism(1, 2, 5, 4, 3); // Right face
+    quadPrism(0, 2, 5, 3, 4); // Left face
 
     numPositions = positions.length;
     console.log(numPositions);
@@ -837,8 +837,8 @@ var perspectiveExample = function () {
         let deltaX = event.clientX - lastX;
         let deltaY = event.clientY - lastY;
 
-        rotationY += deltaX ; // Adjust rotation speed as needed
-        rotationX += deltaY ;
+        rotationY += deltaX; // Adjust rotation speed as needed
+        rotationX += deltaY;
 
         lastX = event.clientX;
         lastY = event.clientY;
