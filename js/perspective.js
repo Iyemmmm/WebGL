@@ -26,14 +26,13 @@ var perspectiveExample = function () {
 
   // Vertices for the top and bottom of the triangular prism
   var verticesPrism = [
-    vec4(0.0, 1.0, 0.0, 1.0), // Puncak atas
-    vec4(-1.0, 0.0, 1.0, 1.0), // Kiri bawah (alas depan)
-    vec4(1.0, 0.0, 1.0, 1.0), // Kanan bawah (alas depan)
-    vec4(0.0, 1.0, -1.0, 1.0), // Puncak bawah (alas belakang)
-    vec4(-1.0, 0.0, -1.0, 1.0), // Kiri bawah (alas belakang)
-    vec4(1.0, 0.0, -1.0, 1.0), // Kanan bawah (alas belakang)
+    vec4(-1.0, 0.0, 2.0, 1.0), // Front left (base of triangle)
+    vec4(1.0, 0.0, 2.0, 1.0), // Front right (base of triangle)
+    vec4(0.0, 1.0, 2.0, 1.0), // Front peak (top of triangle)
+    vec4(-1.0, 0.0, -2.0, 1.0), // Back left (base of back triangle)
+    vec4(1.0, 0.0, -2.0, 1.0), // Back right (base of back triangle)
+    vec4(0.0, 1.0, -2.0, 1.0), // Back peak (top of back triangle)
   ];
-
   // Colors for the triangular prism vertices
   var vertexColorsPrism = [
     vec4(1.0, 0.0, 0.0, 1.0), // Red for top front
@@ -758,10 +757,10 @@ var perspectiveExample = function () {
     // Back face (triangle) - Warna hijau
     trianglePrism(3, 4, 5, 1); // Sisi belakang
 
-    // Side faces (connecting front and back) - Warna yang berbeda
-    quadPrism(0, 1, 4, 3, 2); // Sisi kiri - Biru
-    quadPrism(0, 2, 5, 3, 5); // Sisi kanan - Cyan
-    quadPrism(1, 2, 5, 4, 4); // Sisi bawah - Magenta
+    // Create the rectangular faces
+    quadPrism(0, 1, 4, 3, 2); // Bottom face (connects front and back base)
+    quadPrism(1, 2, 5, 4, 3); // Right face
+    quadPrism(0, 2, 5, 3, 4); // Left face
 
     numPositions = positions.length;
     console.log(numPositions);
