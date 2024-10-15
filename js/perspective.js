@@ -142,7 +142,6 @@ var perspectiveExample = function () {
   // -1.0471975511965976
   // var phi = 1.570796326794896;
   var phi = 0.0;
-  var dr = (5.0 * Math.PI) / 180.0;
 
   var fovy = 60.0; // Field-of-view in Y direction angle (in degrees)
   var aspect; // Viewport aspect ratio
@@ -514,12 +513,15 @@ var perspectiveExample = function () {
         var y = cosTheta;
         var z = sinPhi * sinTheta;
 
+        // Tambahkan posisi vertex
         positions.push(vec4(radius * x, radius * y, radius * z, 1.0));
 
         // Normal untuk shading yang solid
+        // Tambahkan normal untuk setiap vertex
         normals.push(vec3(x, y, z));
 
         // colors.push(vec4(0, 0.0, 0.0, 1.0)); // Warna merah
+        // Warna sesuai dengan posisi vertex
         colors.push(vec4(Math.abs(x), Math.abs(y), Math.abs(z), 1.0)); // Warna sesuai posisi untuk gradien
       }
     }
@@ -552,10 +554,12 @@ var perspectiveExample = function () {
   function colorSphere() {
     positions = [];
     colors = [];
+    normals = [];
 
     var sphereData = createSphere(30, 30, 1.0); // 30 segmen latitude, 30 segmen longitude, radius 1.0
     positions = sphereData.positions;
     colors = sphereData.colors;
+    normals = sphereData.normals; // Gunakan normal dari sphereData
 
     numPositions = positions.length;
     console.log(numPositions);
@@ -772,14 +776,14 @@ var perspectiveExample = function () {
 
     aspect = canvas.width / canvas.height;
 
-    gl.clearColor(1.0, 0.5, 0.0, 1.0);
+    gl.clearColor(1.0, 0.5, 0.0, 1.0); // Background color
 
-    gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.DEPTH_TEST); // Enable depth testing
 
     //
     //  Load shaders and initialize attribute buffers
     //
-    var program = initShaders(gl, "vertex-shader", "fragment-shader");
+    program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
 
     // colorDodecahedron();
@@ -787,15 +791,17 @@ var perspectiveExample = function () {
     // Buat buffer tapi jangan isi datanya
     vBuffer = gl.createBuffer();
     cBuffer = gl.createBuffer();
+    // nBuffer = gl.createBuffer();
 
+    // Get locations of attributes and uniforms
     positionLoc = gl.getAttribLocation(program, "aPosition");
     colorLoc = gl.getAttribLocation(program, "aColor");
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "uModelViewMatrix");
     projectionMatrixLoc = gl.getUniformLocation(program, "uProjectionMatrix");
+    rotatedMatrixLoc = gl.getUniformLocation(program, "uNormalMatrix");
 
-    // buttons for viewing parameters
-
+    // Set up event listeners and initial render
     render(); // Render awal (kosong) hanya untuk membersihkan layar
   }
 
