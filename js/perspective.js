@@ -3,7 +3,7 @@
 var perspectiveExample = function () {
   var canvas;
   var gl;
-
+  var program;
   var currentShape = ""; // Tidak ada objek yang tampil saat awal
   var numPositions = 108;
   var vBuffer, cBuffer; // Buffer untuk posisi
