@@ -695,7 +695,7 @@ var perspectiveExample = function () {
       d,
       e, // Third triangle
     ];
-    var tex = [0, 1, 2, 0, 2, 3];
+    var tex = [0, 1, 2, 0, 2, 3,0,3,1];
 
     for (var i = 0; i < indices.length; ++i) {
       positions.push(verticesDodecahedron[indices[i]]);
@@ -795,8 +795,11 @@ var perspectiveExample = function () {
   // Helper function to create triangles
   function trianglePrism(a, b, c, colorIndex) {
     positions.push(verticesPrism[a]);
+    texCoordsArray.push(texCoord[0]);
     positions.push(verticesPrism[b]);
+    texCoordsArray.push(texCoord[1]);
     positions.push(verticesPrism[c]);
+    texCoordsArray.push(texCoord[2]);
 
     // Warna yang sama untuk setiap vertex pada sisi segitiga
     var color = vertexColorsPrism[colorIndex];
@@ -808,22 +811,29 @@ var perspectiveExample = function () {
   // Helper function to create quads (rectangular sides)
   function quadPrism(a, b, c, d, colorIndex) {
     positions.push(verticesPrism[a]);
-    colors.push(vertexColorsPrism[colorIndex]); // Warna yang sama untuk semua vertex
+    colors.push(vertexColorsPrism[colorIndex]); 
+    texCoordsArray.push(texCoord[0]);
+    // Warna yang sama untuk semua vertex
 
     positions.push(verticesPrism[b]);
     colors.push(vertexColorsPrism[colorIndex]);
+    texCoordsArray.push(texCoord[1]);
 
     positions.push(verticesPrism[c]);
     colors.push(vertexColorsPrism[colorIndex]);
+    texCoordsArray.push(texCoord[2]);
 
     positions.push(verticesPrism[a]);
     colors.push(vertexColorsPrism[colorIndex]);
+    texCoordsArray.push(texCoord[0]);
 
     positions.push(verticesPrism[c]);
     colors.push(vertexColorsPrism[colorIndex]);
+    texCoordsArray.push(texCoord[2]);
 
     positions.push(verticesPrism[d]);
     colors.push(vertexColorsPrism[colorIndex]);
+    texCoordsArray.push(texCoord[3]);
   }
 
   // Function to create the triangular prism
