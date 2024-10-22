@@ -6,8 +6,8 @@ var perspectiveExample = function () {
 
   var currentShape = ""; // Tidak ada objek yang tampil saat awal
   var numPositions = 108;
-  var vBuffer, cBuffer; // Buffer untuk posisi
-  var positionLoc; // Lokasi atribut posisi dalam shader
+  var vBuffer, cBuffer, tBuffer; // Buffer untuk posisi
+  var positionLoc, texCoordLoc; // Lokasi atribut posisi dalam shader
   var colorLoc; // Lokasi atribut warna dalam shader
 
   var positions = [];
@@ -20,9 +20,55 @@ var perspectiveExample = function () {
     rotationY = 0;
   let rotatedXDrag = rotateX(0.0, 0.0, 0.0);
   let rotatedYDrag = rotateY(0.0, 0.0, 0.0);
+  var texSize = 128;
+
+  var flag = true;
 
   const A = (1 + Math.sqrt(5)) / 2; // The golden ratio
   const B = 1 / A;
+
+  var image1 = new Array();
+  for (var i = 0; i < texSize; i++) image1[i] = new Array();
+  for (var i = 0; i < texSize; i++)
+    for (var j = 0; j < texSize; j++) image1[i][j] = new Float32Array(4);
+  for (var i = 0; i < texSize; i++)
+    for (var j = 0; j < texSize; j++) {
+      var c = ((i & 0x8) == 0) ^ ((j & 0x8) == 0);
+      image1[i][j] = [c, c, c, 1];
+    }
+
+  var image2 = new Uint8Array(4 * texSize * texSize);
+
+  for (var i = 0; i < texSize; i++)
+    for (var j = 0; j < texSize; j++)
+      for (var k = 0; k < 4; k++)
+        image2[4 * texSize * i + 4 * j + k] = 255 * image1[i][j][k];
+
+  var texCoordsArray = [];
+  var texCoord = [vec2(0, 0), vec2(0, 1), vec2(1, 1), vec2(1, 0)];
+  function configureTexture(image) {
+    var texture = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      texSize,
+      texSize,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      image
+    );
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.texParameteri(
+      gl.TEXTURE_2D,
+      gl.TEXTURE_MIN_FILTER,
+      gl.NEAREST_MIPMAP_LINEAR
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  }
 
   // Vertices for the top and bottom of the triangular prism
   var verticesPrism = [
@@ -461,26 +507,35 @@ var perspectiveExample = function () {
     colors.push(color);
     colors.push(color);
     colors.push(color);
+    texCoordsArray.push(texCoord[0]);
+    texCoordsArray.push(texCoord[1]);
+    texCoordsArray.push(texCoord[2]);
   }
 
   function quadPyramid(a, b, c, d, colorIndex) {
     positions.push(verticesPyramid[a]);
     colors.push(vertexColorsPyramid[colorIndex]);
+    texCoordsArray.push(texCoord[0]);
 
     positions.push(verticesPyramid[b]);
     colors.push(vertexColorsPyramid[colorIndex]);
+    texCoordsArray.push(texCoord[1]);
 
     positions.push(verticesPyramid[c]);
     colors.push(vertexColorsPyramid[colorIndex]);
+    texCoordsArray.push(texCoord[2]);
 
     positions.push(verticesPyramid[a]);
     colors.push(vertexColorsPyramid[colorIndex]);
+    texCoordsArray.push(texCoord[0]);
 
     positions.push(verticesPyramid[c]);
     colors.push(vertexColorsPyramid[colorIndex]);
+    texCoordsArray.push(texCoord[2]);
 
     positions.push(verticesPyramid[d]);
     colors.push(vertexColorsPyramid[colorIndex]);
+    texCoordsArray.push(texCoord[3]);
   }
 
   function createPyramid() {
@@ -598,22 +653,28 @@ var perspectiveExample = function () {
       // Buat sisi segitiga antara titik puncak dan dua titik pada alas
       positions.push(tip);
       colors.push(vertexColorsCone[0]);
+      texCoordsArray.push(texCoord[0]);
 
       positions.push(vec4(x1, 0.0, z1, 1.0));
       colors.push(vertexColorsCone[1]);
+      texCoordsArray.push(texCoord[1]);
 
       positions.push(vec4(x2, 0.0, z2, 1.0));
       colors.push(vertexColorsCone[2]);
+      texCoordsArray.push(texCoord[2]);
 
       // Buat alas lingkaran sebagai dua segmen
       positions.push(vec4(0.0, 0.0, 0.0, 1.0)); // Titik tengah alas
       colors.push(vertexColorsCone[3]);
+      texCoordsArray.push(texCoord[3]);
 
       positions.push(vec4(x1, 0.0, z1, 1.0));
       colors.push(vertexColorsCone[4]);
+      texCoordsArray.push(texCoord[0]);
 
       positions.push(vec4(x2, 0.0, z2, 1.0));
       colors.push(vertexColorsCone[4]);
+      texCoordsArray.push(texCoord[1]);
     }
 
     numPositions = positions.length;
@@ -634,26 +695,37 @@ var perspectiveExample = function () {
       d,
       e, // Third triangle
     ];
+    var tex = [0, 1, 2, 0, 2, 3];
 
     for (var i = 0; i < indices.length; ++i) {
       positions.push(verticesDodecahedron[indices[i]]);
-      colors.push(vertexColorsDodecahedron[f]); // Use the color of the first vertex for solid colors
+      colors.push(vertexColorsDodecahedron[f]);
+      // Use the color of the first vertex for solid colors
+    }
+    for (var i = 0; i < tex.length; ++i) {
+      texCoordsArray.push(texCoord[tex[i]]);
     }
   }
 
   function quadCube(a, b, c, d) {
     positions.push(verticesCube[a]);
     colors.push(vertexColorsCube[a]);
+    texCoordsArray.push(texCoord[0]);
     positions.push(verticesCube[b]);
     colors.push(vertexColorsCube[a]);
+    texCoordsArray.push(texCoord[1]);
     positions.push(verticesCube[c]);
     colors.push(vertexColorsCube[a]);
+    texCoordsArray.push(texCoord[2]);
     positions.push(verticesCube[a]);
     colors.push(vertexColorsCube[a]);
+    texCoordsArray.push(texCoord[0]);
     positions.push(verticesCube[c]);
     colors.push(vertexColorsCube[a]);
+    texCoordsArray.push(texCoord[2]);
     positions.push(verticesCube[d]);
     colors.push(vertexColorsCube[a]);
+    texCoordsArray.push(texCoord[3]);
   }
 
   function updateBuffer() {
@@ -668,6 +740,13 @@ var perspectiveExample = function () {
     gl.bufferData(gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW);
     gl.vertexAttribPointer(colorLoc, 4, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(colorLoc);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, tBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(texCoordsArray), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(texCoordLoc, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(texCoordLoc);
+
+    configureTexture(image2);
   }
 
   function colorCube() {
@@ -795,12 +874,15 @@ var perspectiveExample = function () {
     // Buat buffer tapi jangan isi datanya
     vBuffer = gl.createBuffer();
     cBuffer = gl.createBuffer();
+    tBuffer = gl.createBuffer();
 
     positionLoc = gl.getAttribLocation(program, "aPosition");
     colorLoc = gl.getAttribLocation(program, "aColor");
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "uModelViewMatrix");
     projectionMatrixLoc = gl.getUniformLocation(program, "uProjectionMatrix");
+    texCoordLoc = gl.getAttribLocation(program, "aTexCoord");
+    gl.uniform1i(gl.getUniformLocation(program, "uTextureMap"), 0);
 
     // buttons for viewing parameters
 
